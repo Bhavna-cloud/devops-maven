@@ -3,7 +3,7 @@ os: linux
 # We need to copy our war file over to the tomcat applications directory, which is /opt/tomcat/webapps
 files: 
   - source: /target/hello-world-maven.war
-    destination: /opt/tomcat/webapps
+    destination: /opt/tomcat/webapps/ROOT.war
     overwrite: true
 
 
