@@ -1,18 +1,35 @@
 #!/bin/bash
 
-# Stop Tomcat
-sudo systemctl stop tomcat
+# Stop script on any error
+set -e
 
-# Ensure the backup directory exists in S3
-aws s3 ls s3://mydatabucket03/backup/ || aws s3 mb s3://mydatabucket03/backup/
-
-# Get the current date and time (YYYYMMDD-HHMMSS)
+# Define variables
+WAR_FILE="/opt/tomcat/webapps/hello-world-maven.war"
+S3_BUCKET="s3://mydatabucket03/backup"
 TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+BACKUP_FILE="$S3_BUCKET/hello-world-maven-$TIMESTAMP.war"
+LOG_FILE="/var/log/tomcat_backup.log"
 
-# Move WAR file to S3 with a timestamp
-if [ -f "/opt/tomcat/webapps/hello-world-maven.war" ]; then
-    aws s3 mv /opt/tomcat/webapps/hello-world-maven.war s3://mydatabucket03/backup/hello-world-maven-$TIMESTAMP.war
-    echo "WAR file moved to S3: s3://mydatabucket03/backup/hello-world-maven-$TIMESTAMP.war"
+# Function to log messages
+log_message() {
+    echo "$(date +"%Y-%m-%d %H:%M:%S") - $1" | tee -a "$LOG_FILE"
+}
+
+log_message "Stopping Tomcat service..."
+sudo systemctl stop tomcat || log_message "Warning: Failed to stop Tomcat"
+
+# Check if WAR file exists before backing up
+if [ -f "$WAR_FILE" ]; then
+    log_message "Backing up WAR file to S3: $BACKUP_FILE"
+    
+    if aws s3 cp "$WAR_FILE" "$BACKUP_FILE"; then
+        log_message "WAR file successfully backed up to S3."
+    else
+        log_message "Error: Failed to copy WAR file to S3."
+        exit 1
+    fi
 else
-    echo "No WAR file found to move."
+    log_message "No WAR file found to back up."
 fi
+
+exit 0
