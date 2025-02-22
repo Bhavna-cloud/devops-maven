@@ -10,13 +10,23 @@ TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
 BACKUP_FILE="$S3_BUCKET/hello-world-maven-$TIMESTAMP.war"
 LOG_FILE="/var/log/tomcat_backup.log"
 
+# Ensure the log file exists and has correct permissions
+if [ ! -f "$LOG_FILE" ]; then
+    sudo touch "$LOG_FILE"
+    sudo chmod 666 "$LOG_FILE"
+fi
+
 # Function to log messages
 log_message() {
     echo "$(date +"%Y-%m-%d %H:%M:%S") - $1" | tee -a "$LOG_FILE"
 }
 
 log_message "Stopping Tomcat service..."
-sudo systemctl stop tomcat || log_message "Warning: Failed to stop Tomcat"
+if sudo systemctl stop tomcat; then
+    log_message "Tomcat service stopped successfully."
+else
+    log_message "Warning: Failed to stop Tomcat."
+fi
 
 # Check if WAR file exists before backing up
 if [ -f "$WAR_FILE" ]; then
