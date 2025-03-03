@@ -18,11 +18,11 @@ hooks:
 # the existing applications cleaned up
   ApplicationStop:
     - location: scripts/server_stop_clean.sh
-      timeout: 60
+      timeout: 180
       runas: root
 
 # Now we can start up Tomcat once again
   ApplicationStart:
     - location: scripts/server_start.sh   
-      timeout: 60
+      timeout: 120
       runas: root
