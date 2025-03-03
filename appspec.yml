@@ -23,13 +23,3 @@ hooks:
     - location: scripts/server_start.sh   
       timeout: 120
       runas: root
-
-  BeforeAllowTraffic:
-    - location: scripts/check_ready.sh
-      timeout: 180
-      runas: root
-
-  AfterAllowTraffic:
-    - location: scripts/after_traffic.sh
-      timeout: 60
-      runas: root
