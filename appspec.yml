@@ -16,10 +16,10 @@ permissions:
 hooks:
   ApplicationStop:
     - location: scripts/server_stop_clean.sh
-      timeout: 180
+      timeout: 60
       runas: root
 
   ApplicationStart:
     - location: scripts/server_start.sh   
-      timeout: 120
+      timeout: 60
       runas: root
